@@ -6,12 +6,13 @@ import static com.example.squidgame.GameView.screenRatioY;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 public class Flight {
     int toShoot = 0;
     boolean isGoingUp = false;
     int x, y, width, height, wingCounter = 0, shootCounter = 1;
-    Bitmap flight1, flight2, shoot1, shoot2, shoot3, shoot4, shoot5;
+    Bitmap flight1, flight2, shoot1, shoot2, shoot3, shoot4, shoot5, dead;
     private GameView gameView;
 
     Flight(GameView gameView, int screenY, Resources res) {
@@ -43,6 +44,9 @@ public class Flight {
         shoot3 = Bitmap.createScaledBitmap(shoot3, width, height, false);
         shoot4 = Bitmap.createScaledBitmap(shoot4, width, height, false);
         shoot5 = Bitmap.createScaledBitmap(shoot5, width, height, false);
+
+        dead = BitmapFactory.decodeResource(res, R.drawable.dead);
+        dead = Bitmap.createScaledBitmap(dead, width, height, false);
 
         y = screenY / 2;
         x = (int) (64 * screenRatioX);
@@ -85,5 +89,12 @@ public class Flight {
         wingCounter--;
 
         return flight2;
+    }
+        Rect getCollisionShape() {
+        return new Rect(x, y, x + width, y + height);
+    }
+
+    Bitmap getDead() {
+        return dead;
     }
 }
