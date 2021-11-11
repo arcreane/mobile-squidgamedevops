@@ -3,19 +3,23 @@ package com.example.squidgame;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class GameView extends SurfaceView implements Runnable {
 
     private Thread thread;
-    private boolean isPlaying;
+    private boolean isPlaying, isGameOver = false;
     private int screenX, screenY;
     public static float screenRatioX, screenRatioY;
     private Paint paint;
     private List<Bullet> bullets;
+    private Bird[] birds;
+    private Random random;
     private Flight flight;
     private Background background1, background2;
 
@@ -37,6 +41,15 @@ public class GameView extends SurfaceView implements Runnable {
         background2.x = screenX;
 
         paint = new Paint();
+
+        birds = new Bird[4];
+
+        for (int i = 0;i < 4;i++) {
+            Bird bird = new Bird(getResources());
+            birds[i] = bird;
+        }
+
+        random = new Random();
     }
 
     @Override
@@ -78,10 +91,45 @@ public class GameView extends SurfaceView implements Runnable {
                 trash.add(bullet);
 
             bullet.x += 50 * screenRatioX;
+
+            for (Bird bird : birds) {
+                if (Rect.intersects(bird.getCollisionShape(), bullet.getCollisionShape())) {
+                    bird.x = -500;
+                    bullet.x = screenX + 500;
+                    bird.wasShot = true;
+                }
+            }
         }
 
         for (Bullet bullet : trash)
             bullets.remove(bullet);
+
+        for (Bird bird : birds) {
+            bird.x -= bird.speed;
+
+            if (bird.x + bird.width < 0) {
+                if (!bird.wasShot) {
+                    isGameOver = true;
+                    return;
+                }
+
+                int bound = (int) (30 * screenRatioX);
+                bird.speed = random.nextInt(bound);
+
+                if (bird.speed < 10 * screenRatioX)
+                    bird.speed = (int) (10 * screenRatioX);
+
+                bird.x = screenX;
+                bird.y = random.nextInt(screenY - bird.height);
+
+                bird.wasShot = false;
+            }
+
+            if (Rect.intersects(bird.getCollisionShape(), flight.getCollisionShape())) {
+                isGameOver = true;
+                return;
+            }
+        }
     }
 
     private void draw() {
@@ -89,6 +137,16 @@ public class GameView extends SurfaceView implements Runnable {
             Canvas canvas = getHolder().lockCanvas();
             canvas.drawBitmap(background1.background, background1.x, background1.y, paint);
             canvas.drawBitmap(background2.background, background2.x, background2.y, paint);
+
+            if (isGameOver) {
+                isPlaying = false;
+                canvas.drawBitmap(flight.getDead(), flight.x, flight.y, paint);
+                getHolder().unlockCanvasAndPost(canvas);
+                return;
+            }
+
+            for (Bird bird : birds)
+                canvas.drawBitmap(bird.getBird(), bird.x, bird.y, paint);
 
             canvas.drawBitmap(flight.getFlight(), flight.x, flight.y, paint);
 
