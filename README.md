@@ -1,7 +1,7 @@
 # mobile-squidgamedevops
 mobile-squidgamedevops created by GitHub Classroom
-     SquidGameTeam :
-     Keep flying
+                  SquidGameTeam :
+                   Keep flying
          ![](Capture1.png)
      Pour commencer le jeu appuyer sur Play
      Votre meilleur score s’affichera en haut à droite
